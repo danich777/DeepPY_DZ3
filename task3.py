@@ -4,43 +4,41 @@
 # *Верните все возможные варианты комплектации рюкзака.
 
 
-carrying_capacity = int(input('Введите грузоподъемность рюкзака: '))
+def fill_backpack(items, max_weight):
+    sorted_items = sorted(items.items(),
+                          key=lambda x: -x[1],
+                          reverse=True)
+    backpack = {}
 
-list_of_equipment = {'Провиант': 3,
-                     'Вода': 2,
-                     'Палатка': 6,
-                     'Мяч': 0.5,
-                     'Шампура': 1,
-                     'Одежда': 5,
-                     'Снасти': 2.5,
-                     'Алкоголь': 7,
-                     'Топор': 3.5,
-                     'Телевизор': 25}
-
-
-def sort_list(some_set: set):
-    global global_list
-    if len(some_set) == 1:
-        return some_set
-    else:
-        for item in some_set:
-            new_set = some_set.copy()
-            new_set.remove(item)
-            global_list.add(tuple(sort_list(new_set)))
-    return some_set
+    for k, v in sorted_items:
+        if v <= max_weight:
+            backpack.update({k: v})
+            max_weight -= v
+    return backpack
 
 
-list_of_equipment = dict(sorted(list_of_equipment.items(), key=lambda x: x[1]))
-global_list = {tuple(list_of_equipment)}
-sort_list(set(list_of_equipment))
+items = {'палатка': 4, 'спальник': 2, 'еда': 3, 'вода': 1}
+max_weight = 7
+print(*fill_backpack(items, max_weight))
 
-print(f'В рюкзак грузоподъемностью {carrying_capacity}кг может влезть:')
 
-for stack in global_list:
-    summ_stack = 0
-    for item in stack:
-        summ_stack += list_of_equipment.get(item)
-        if summ_stack > carrying_capacity:
-            break
-    else:
-        print(*stack, 'весом', summ_stack, 'кг')
+# Для возврата всех возможных вариантов можно использовать рекурсию:
+def fill_backpacks(backpack, remaining_weight, index, sorted_items, backpacks):
+    if remaining_weight == 0 or index == len(sorted_items):
+        backpacks.append(backpack)
+        return
+    item, weight = sorted_items[index]
+    if weight <= remaining_weight:
+        fill_backpacks(backpack + [(item, weight)], remaining_weight - weight,
+                       index + 1, sorted_items, backpacks)
+    fill_backpacks(backpack, remaining_weight,
+                   index + 1, sorted_items, backpacks)
+
+
+items = {'палатка': 4, 'спальник': 2, 'еда': 3, 'вода': 1}
+max_weight = 7
+sorted_items = sorted(items.items(), key=lambda x: -x[1], reverse=True)
+backpacks = []
+fill_backpacks([], max_weight, 0, sorted_items, backpacks)
+for backpack in backpacks:
+    print(*backpack)
